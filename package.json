@@ -1,0 +1,15 @@
+{
+  "name": "videoseries",
+  "version": "1.0.0",
+  "description": "Learning backend using this project which is about of video sharing website",
+  "keywords": [
+    "backend",
+    "videoseries"
+  ],
+  "author": "shiva Navik",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
