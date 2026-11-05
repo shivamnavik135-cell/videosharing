@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 const userSchema = new Schema(
     {
-        username:{
+        userName:{
             type:String,
             required:true,
             unique:true,
@@ -70,7 +70,7 @@ userSchema.methods.isPasswordMatch= async function(password){
 userSchema.methods.generateAccessToken=function(){
     jwt.sign({
         _id:this._id,
-        username:this.username,
+        userName:this.userName,
         email:this.email,
         fullName:this.fullName
 
