@@ -1,17 +1,25 @@
 import dotenv from "dotenv";
-dotenv.config({path:"./.env"});
+dotenv.config({ path: "./.env" });
+
+console.log("1. Index.js started");
+
 import { connectDB } from "./db/index.js";
 import { app } from "./app.js";
 
-connectDB()
-.then(()=>{
-    app.listen(process.env.PORT || 8000,()=>{
-        console.log(`Server is running on port ${process.env.PORT}`)
-        console.log(`URL: http://localhost:${process.env.PORT || 8000}/api/v1/user/register`)
-    })
+console.log("2. App imported successfully");
 
-})
-.catch((err)=>{
-    console.log("Error while connecting to database",err);
-    
-})
+connectDB()
+    .then(() => {
+        console.log("3. Database connected");
+
+        const server = app.listen(8001, () => {
+            console.log("4. Server listening on port 8001");
+        });
+
+        server.on("request", (req, res) => {
+            console.log("5. Incoming request:", req.method, req.url);
+        });
+    })
+    .catch((err) => {
+        console.error("Database connection error:", err);
+    });
