@@ -5,6 +5,23 @@ import { User } from "../models/user.models.js";
 import apiError from "../utils/apiError.js";
 import uploadToCloudinary from "../utils/cloudinary.js";
 
+const genertaeRefreshTokenAndAcessToken = async(userId)=>{
+        try{
+            const user = await User.findById(userId);
+            const acessToken= user.generateAccessToken();
+            const refreshToken = user.generateRefreshToken();
+            user.refreshToken = refreshToken;
+            await user.save({validationBeforeSave : false});
+
+            return {acessToken,refreshToken};
+
+        }
+        catch(err){
+            throw new apiError(500,"Something went Wrongwhile generating tokens")
+        }
+
+    };
+
 const registerUser = asyncHandler(async (req, res) => {
 
     console.log("\n========== REGISTRATION STARTED ==========");
@@ -138,6 +155,65 @@ const registerUser = asyncHandler(async (req, res) => {
             "User registered successfully"
         )
     );
+
+});
+
+const loginUser = asyncHandler (async (req,res)=>{
+    // Implementation for loginUser will go here
+    //usrer email and password required field 
+    // check user exist or not 
+    // if user not exist redirect it to register page 
+    // if user exsit then check  for thr credentials if correct or not
+    // if correct then genrate access token and refreshToken
+    // send the access token and refresh token to the user 
+    
+
+    const {email,userName,password}= req.body;
+    console.log(`login request from user: ${email} ${userName}`);
+
+    if (!email || !userName) {
+        throw new apiError(400,"Email and username are required")
+    };
+
+    const user = await User.findOne({
+        $or:[
+            {email},{userName}
+        ]
+    });
+    console.log(`user found: ${user}`);
+    if (!user){
+        throw new apiError(404,"user not found please register first")
+    };
+
+    
+
+    const isPasswordCorrect = await user.isPasswordMatch(password);
+    if (!isPasswordCorrect){
+        throw new apiError(401,"invalid credentials")
+    };
+
+    const {acessToken,refreshToken} = await genertaeRefreshTokenAndAcessToken(user._id);
+
+    const loggedInUser= await User.findById(user._id)
+    .select("-password -refreshToken");
+
+    const options ={
+        httpObly : true,
+        secure: true
+    }
+
+    return res.ststus(200)
+    .cookie("refreshToken",refreshToken,options)
+    .cookie("accessToken",acessToken,options)
+    .json(
+        new apiResponse(
+            200,
+            loggedInUser,
+            "user logged in successfully"
+        )
+    )
+
+    
 
 });
 
