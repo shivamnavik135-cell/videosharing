@@ -306,10 +306,80 @@ const getCurrentUser = asyncHandler(async(req,res)=>{
 
 });
 
+const updateDetails = asyncHandler(async(req,res)=>{
+    const {fullName,email} = req.body;
+
+    if(!fullName || !email){
+        throw new apiError(400,"All Feilds are required");
+    };
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                email,
+                fullName
+            }
+        },
+        {new : true}
+    ).select("-password")
+
+});
+
+
+const updateAvatarImage = asyncHandler(async(req,res)=>{
+    const AvatarLocalPath = req.file?.path;
+    if(!AvatarLocalPath){
+        throw new apiError(400,"Not get Avatar Path")
+    };
+
+    const avatar = await uploadToCloudinary(AvatarLocalPath);
+    if(!avatar){
+        throw new apiError(400,"Not get Avatar ")
+       };
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,{
+            $set:{
+                avatar:avatar
+            }
+        },{new:true}
+    ).select("-password")
+
+    return res.status(200).
+    json(new apiResponse(200,"Avatar update !!SuccesFully"))
+
+});
+
+const updateCoverImage = asyncHandler(async(req,res)=>{
+    const coverLocalPath = req.file?.path;
+    if(!coverLocalPath){
+        throw new apiError(400,"Not get Cover Path")
+    };
+
+    const cover = await uploadToCloudinary(coverLocalPath);
+    if(!cover){
+        throw new apiError(400,"Not get Cover ")
+       };
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,{
+            $set:{
+                cover:cover
+            }
+        },{new:true}
+    ).select("-password")
+
+    return res.status(200).
+    json(new apiResponse(200,"CoverImage update !!SuccesFully"))
+
+});
+
 export {registerUser,
     loginUser,
     LogoutUser,
     refreshedToken,
     changeCurrentUserPass,
-    getCurrentUser
+    getCurrentUser,
+    updateDetails,
+    updateAvatarImage,
+    updateCoverImage
 };
